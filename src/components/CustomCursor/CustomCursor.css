@@ -1,0 +1,55 @@
+body {
+  cursor: none;
+}
+
+.cursor {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: width 0.3s, height 0.3s;
+  will-change: transform;
+}
+
+.cursor-follower {
+  position: fixed;
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transition: all 0.3s ease;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* Hover states */
+.cursor.cursor-hover {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+.cursor-follower.cursor-hover {
+  width: 70px;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transform: translate3d(-35px, -35px, 0) scale(1.2);
+}
+
+/* Make sure all interactive elements show custom cursor */
+a, button, .nav-link {
+  cursor: none;
+}
+
+/* Ensure smooth transitions */
+.cursor,
+.cursor-follower {
+  transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+} 

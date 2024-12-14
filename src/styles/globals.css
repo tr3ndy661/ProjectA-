@@ -1,0 +1,45 @@
+:root {
+  --font-primary: 'Satoshi', sans-serif;  /* Same as landing page */
+  --dark-base: #111111;
+  --text-color: #ffffff;
+}
+
+/* Import Satoshi font */
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Variable.woff2') format('woff2'),
+       url('/fonts/Satoshi-Variable.woff') format('woff'),
+       url('/fonts/Satoshi-Variable.ttf') format('truetype');
+  font-weight: 300 900;
+  font-display: swap;
+  font-style: normal;
+}
+
+/* Apply font globally */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-primary);
+}
+
+body {
+  background: var(--dark-base);
+  color: var(--text-color);
+  font-family: var(--font-primary);
+}
+
+/* Update specific text elements */
+.chat-header h1,
+.chat-message,
+.input-area input,
+.input-area button,
+.settings-panel h2,
+.settings-panel label,
+.modal-content h2,
+.modal-content p {
+  font-family: var(--font-primary);
+}
+
+/* Keep other existing styles */
+ 

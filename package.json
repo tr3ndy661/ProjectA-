@@ -11,13 +11,21 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
+    "@studio-freight/lenis": "^1.0.42",
     "@types/dom-speech-recognition": "^0.0.4",
+    "framer-motion": "^11.13.1",
+    "gsap": "^3.12.5",
     "lucide-react": "^0.465.0",
     "react": "^18.3.1",
+    "react-device-detect": "^2.2.3",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
+    "react-router-dom": "^7.0.2",
+    "react-slick": "^0.30.2",
     "react-speech-recognition": "^3.10.0",
-    "regenerator-runtime": "^0.14.1"
+    "regenerator-runtime": "^0.14.1",
+    "styled-components": "^6.1.13",
+    "typewriter-effect": "^2.21.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

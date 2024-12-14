@@ -1,0 +1,9 @@
+// ... existing code ...
+<div className="skills-grid">
+  <div className="skill-item">
+    <span className="skill-icon">⚛️</span>
+    <span className="skill-name">React</span>
+  </div>
+  // ... other skill items remain unchanged ...
+</div>
+// ... existing code ...

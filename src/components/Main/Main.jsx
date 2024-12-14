@@ -2,6 +2,18 @@ import React, { useContext, useRef, useState, useEffect } from "react";
 import { Context } from "../../context/Context";
 import "./Main.css";
 import { assets } from "../../assets/assets";
+import CustomCursor from "../CustomCursor/CustomCursor";
+
+const thinkingMessages = [
+  "AI is thinking hard...",
+  "Processing your request...",
+  "Analyzing information...",
+  "Generating response...",
+  "Contemplating the universe...",
+  "Connecting the dots...",
+  "Computing possibilities...",
+  "Gathering insights..."
+];
 
 const Main = () => {
   const {
@@ -156,17 +168,35 @@ const Main = () => {
     useEffect(() => {
       if (text) {
         if (isNewResponse) {
-          // Animate only for new AI responses
           setIsTyping(true);
           let index = 0;
           setDisplayText("");
 
           const typeNextCharacter = () => {
             if (index < text.length) {
-              setDisplayText((current) => current + text.charAt(index));
+              setDisplayText((current) => {
+                // Add character with random delay for more natural typing
+                const nextChar = text.charAt(index);
+                return current + nextChar;
+              });
               index++;
-              const randomDelay = Math.floor(Math.random() * 20) + 10;
-              setTimeout(typeNextCharacter, randomDelay);
+
+              // Variable typing speed based on punctuation and content
+              let delay = 30; // base delay
+              const currentChar = text.charAt(index);
+              
+              // Slower after punctuation
+              if (['.', '!', '?', '\n'].includes(text.charAt(index - 1))) {
+                delay = 500;
+              } 
+              // Faster for spaces and common characters
+              else if ([' ', 'e', 't', 'a', 'o', 'i'].includes(currentChar)) {
+                delay = 20;
+              }
+              // Random variation for natural feel
+              delay += Math.random() * 30;
+
+              setTimeout(typeNextCharacter, delay);
             } else {
               setIsTyping(false);
             }
@@ -174,7 +204,7 @@ const Main = () => {
 
           typeNextCharacter();
         } else {
-          // Instantly show text for recent chats
+          // Instantly show text for non-new responses
           setDisplayText(text);
           setIsTyping(false);
         }
@@ -214,202 +244,238 @@ const Main = () => {
     }
   };
 
+  const [thinkingMessage, setThinkingMessage] = useState("");
+
+  useEffect(() => {
+    let messageInterval;
+    if (loading) {
+      // Set initial message
+      setThinkingMessage(thinkingMessages[0]);
+      
+      // Change message every 3 seconds
+      let index = 1;
+      messageInterval = setInterval(() => {
+        setThinkingMessage(thinkingMessages[index]);
+        index = (index + 1) % thinkingMessages.length;
+      }, 3000);
+    }
+
+    return () => {
+      if (messageInterval) {
+        clearInterval(messageInterval);
+      }
+    };
+  }, [loading]);
+
   return (
-    <div
-      className={`main ${isSidebarOpen ? "sidebar-open" : ""}`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      {/* Hidden file input */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        style={{ display: "none" }}
-        onChange={handleLocalFileUpload}
-        accept=".jpg,.jpeg,.png,.gif,.pdf,.txt,.csv,.xlsx"
-      />
+    <>
+      <CustomCursor />
+      <div
+        className={`main ${isSidebarOpen ? "sidebar-open" : ""}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {/* Hidden file input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={handleLocalFileUpload}
+          accept=".jpg,.jpeg,.png,.gif,.pdf,.txt,.csv,.xlsx"
+        />
 
-      <div className="nav">
-        <img src={assets.gemini_icon} alt="" />
-        <p id="Makhs-AI">Makhs-Ai</p>
-        <img src={assets.user_icon} alt="" />
-      </div>
-      <div className="main-container">
-        {/* Drag and Drop Overlay */}
-        {isDragOver && (
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: "rgba(0,0,0,0.5)",
-              zIndex: 1000,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontSize: "24px",
-            }}
-          >
-            Drop files here
-          </div>
-        )}
-
-        {!showResult && (
-          <>
-            <div className="greet">
-              <p>
-                <span>Hola Mamacita.</span>{" "}
-              </p>
-              <p>How can I assist you today?</p>
-            </div>
-            <div className="cards">
-              <div
-                className="card"
-                onClick={() =>
-                  handleCardClick("Suggest a new restaurant for me to try.")
-                }
-              >
-                <p>Suggest a new restaurant for me to try.</p>
-                <img src={assets.compass_icon} alt="" />
-              </div>
-              <div
-                className="card"
-                onClick={() =>
-                  handleCardClick("Brain storm ideas for a dinner party menu.")
-                }
-              >
-                <p>Brain storm ideas for a dinner party menu.</p>
-                <img src={assets.bulb_icon} alt="" />
-              </div>
-              <div
-                className="card"
-                onClick={() =>
-                  handleCardClick("Reccomend me a movie to watch.")
-                }
-              >
-                <p>Reccomend me a movie to watch.</p>
-                <img src={assets.message_icon} alt="" />
-              </div>
-              <div
-                className="card"
-                onClick={() =>
-                  handleCardClick(
-                    "Help me optimize my code to improve readability."
-                  )
-                }
-              >
-                <p>Help me optimize my code to improve readability.</p>
-                <img src={assets.code_icon} alt="" />
-              </div>
-            </div>
-          </>
-        )}
-
-        {showResult && (
-          <div className="result">
-            <div className="result-title">
-              <img src={assets.user_icon} alt="" />
-              <p>{recentPrompt}</p>
-            </div>
-            <div className="result-data">
-              <img src={assets.gemini_icon} alt="" />
-              {loading ? (
-                <div className="loading">
-                  <div className="typing-indicator">
-                    <div className="dot"></div>
-                    <div className="dot"></div>
-                    <div className="dot"></div>
-                  </div>
-                </div>
-              ) : (
-                <ResultContent text={resultData} isNewResponse={loading} />
-              )}
-            </div>
-          </div>
-        )}
-
-        <div className="main-bottom">
-          {/* File Preview Section */}
-          {localFile && (
-            <div className="file-preview">
-              <span>{localFile.name}</span>
-              <button
-                className="remove-file"
-                onClick={handleFileRemove}
-                aria-label="Remove file"
-              >
-                ×
-              </button>
+        <div className="nav">
+          <img src={assets.gemini_icon} alt="" />
+          <p id="Makhs-AI">Makhs-A\</p>
+          <img src={assets.user_icon} alt="" />
+        </div>
+        <div className="main-container">
+          {/* Drag and Drop Overlay */}
+          {isDragOver && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(0,0,0,0.5)",
+                zIndex: 1000,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "white",
+                fontSize: "24px",
+              }}
+            >
+              Drop files here
             </div>
           )}
 
-          <div className="search-box">
-            <input
-              onChange={(e) => setInput(e.target.value)}
-              value={input}
-              type="text"
-              placeholder="Enter your query here..."
-              className={isListening ? "listening-input" : ""}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  onSent(input);
-                }
-              }}
-            />
-            <div className="input-buttons">
-              {localFile && (
-                <div className="file-preview">
-                  <span>{localFile.name}</span>
-                  <button
-                    className="remove-file"
-                    onClick={handleFileRemove}
-                    aria-label="Remove file"
-                  >
-                    ×
-                  </button>
+          {!showResult && (
+            <>
+              <div className="greet">
+                <p>
+                  <span>Hola Mamacita.</span>{" "}
+                </p>
+                <p>How can I assist you today?</p>
+              </div>
+              <div className="cards">
+                <div
+                  className="card"
+                  onClick={() =>
+                    handleCardClick("Suggest a new restaurant for me to try.")
+                  }
+                >
+                  <p>Suggest a new restaurant for me to try.</p>
+                  <img src={assets.compass_icon} alt="" />
                 </div>
-              )}
-              <img
-                src={assets.gallery_icon}
-                alt="Upload"
-                onClick={triggerFileInput}
-                style={{ cursor: "pointer" }}
-              />
-              <div className="mic-container" onClick={toggleListening}>
-                <img
-                  src={assets.mic_icon}
-                  alt="Voice Input"
-                  className={isListening ? "listening" : ""}
-                />
-                {isListening && (
-                  <div className="listening-animation">
-                    <div className="wave"></div>
-                    <div className="wave"></div>
-                    <div className="wave"></div>
+                <div
+                  className="card"
+                  onClick={() =>
+                    handleCardClick("Brain storm ideas for a dinner party menu.")
+                  }
+                >
+                  <p>Brain storm ideas for a dinner party menu.</p>
+                  <img src={assets.bulb_icon} alt="" />
+                </div>
+                <div
+                  className="card"
+                  onClick={() =>
+                    handleCardClick("Reccomend me a movie to watch.")
+                  }
+                >
+                  <p>Reccomend me a movie to watch.</p>
+                  <img src={assets.message_icon} alt="" />
+                </div>
+                <div
+                  className="card"
+                  onClick={() =>
+                    handleCardClick(
+                      "Help me optimize my code to improve readability."
+                    )
+                  }
+                >
+                  <p>Help me optimize my code to improve readability.</p>
+                  <img src={assets.code_icon} alt="" />
+                </div>
+              </div>
+            </>
+          )}
+
+          {showResult && (
+            <div className="result">
+              <div className="result-title">
+                <img src={assets.user_icon} alt="" />
+                <p>{recentPrompt}</p>
+              </div>
+              <div className="result-data">
+                <img src={assets.gemini_icon} alt="" />
+                {loading ? (
+                  <div className="loading">
+                    <div className="typing-indicator">
+                      <div className="dot"></div>
+                      <div className="dot"></div>
+                      <div className="dot"></div>
+                    </div>
+                    <span className="thinking-message">{thinkingMessage}</span>
                   </div>
+                ) : (
+                  <ResultContent text={resultData} isNewResponse={loading} />
                 )}
               </div>
-              {input && (
+            </div>
+          )}
+
+          <div className="main-bottom">
+            {/* File Preview Section */}
+            {localFile && (
+              <div className="file-preview">
+                <span>{localFile.name}</span>
+                <button
+                  className="remove-file"
+                  onClick={handleFileRemove}
+                  aria-label="Remove file"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            <div className="search-box">
+              <input
+                onChange={(e) => setInput(e.target.value)}
+                value={input}
+                type="text"
+                placeholder="Enter your query here..."
+                className={isListening ? "listening-input" : ""}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    onSent(input);
+                  }
+                }}
+              />
+              <div className="input-buttons">
+                {localFile && (
+                  <div className="file-preview">
+                    <span>{localFile.name}</span>
+                    <button
+                      className="remove-file"
+                      onClick={handleFileRemove}
+                      aria-label="Remove file"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
                 <img
-                  onClick={() => input.trim() && onSent(input)}
-                  src={assets.send_icon}
-                  alt="Send"
+                  src={assets.gallery_icon}
+                  alt="Upload"
+                  onClick={triggerFileInput}
                   style={{ cursor: "pointer" }}
                 />
-              )}
+                <div className="mic-container" onClick={toggleListening}>
+                  <img
+                    src={assets.mic_icon}
+                    alt="Voice Input"
+                    className={isListening ? "listening" : ""}
+                  />
+                  {isListening && (
+                    <div className="listening-animation">
+                      <div className="wave"></div>
+                      <div className="wave"></div>
+                      <div className="wave"></div>
+                    </div>
+                  )}
+                </div>
+                {loading ? (
+                  <button 
+                    className="stop-button" 
+                    onClick={stopGenerating}
+                  >
+                    Stop
+                  </button>
+                ) : (
+                  input && (
+                    <img
+                      onClick={() => input.trim() && onSent(input)}
+                      src={assets.send_icon}
+                      alt="Send"
+                      style={{ cursor: "pointer" }}
+                    />
+                  )
+                )}
+              </div>
             </div>
+            <p className="bottom-info">
+              The AI may display inaccurate info including about people so
+              double-check its responses
+            </p>
           </div>
-          <p className="bottom-info">
-            The AI may display inaccurate info including about people so
-            double-check its responses
-          </p>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
